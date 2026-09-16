@@ -1,0 +1,290 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#   ░▒▒████▒▒░        ░▒▒████▒▒░        ░▒▒████▒▒░    #
+# ░▒▒█▓▒░░▒▓█▒▒░    ░▒▒█▓▒░░▒▓█▓▒░    ░▒▒█▓▒░░▒▓█▒▒░  #
+# ░▒▓█▓▒░           ░▒▓█▓▒░░▒▓█▓▒░    ░▒▓█▓▒░         #
+# ░▒▓█▓▒░▒█████▒▒░  ░▒▓█▓▒░░▒▓█▓▒░    ░▒▓█▓▒░▒█████▒▒░#
+# ░▒▓█▓▒░░▒▓█▓▒░    ░▒▓█▓▒░░▒▓█▓▒░    ░▒▓█▓▒░░▒▓█▓▒░  #
+# ░▒▓█▓▒░░▒▓█▒▒░    ░▒▓█▓▒░░▒▓█▓▒░    ░▒▓█▓▒░░▒▓█▒▒░  #
+#   ░▒▓████▓▒░        ░▒▓████▓▒░        ░▒▓████▓▒░    #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+# Name: Mihomo Yaml Config - GEO Data & Standard Edition
+# Link: https://github.com/gogyt/Mihomo/blob/main/yaml/Geo.yaml
+
+# 功能描述
+# ──────────────────────────────────────────────────────────
+#  规则来源：       ✅ 内置GEO   ☐ RULE-SET规则集
+# ──────────────────────────────────────────────────────────
+#  分流程度：       ✅ 标准分流  ☐ 精简分流  ☐ 重度分流
+# ──────────────────────────────────────────────────────────
+#  仅内核运行：     ✅ 支持      ☐ 不支持
+# ──────────────────────────────────────────────────────────
+#  广告拦截：       ✅ 支持      ☐ 不支持
+# ──────────────────────────────────────────────────────────
+#  自定义故障转移:  ✅ 支持      ☐ 不支持
+# ──────────────────────────────────────────────────────────
+#  多元故障转移：   ☐ 支持      ✅ 不支持
+# ──────────────────────────────────────────────────────────
+#  出站类型：       ✅ 单机场    ☐ 混合出站  ☐ 指定机场出站
+# ──────────────────────────────────────────────────────────
+
+# 配置说明 (本文件已按"单机场 + 自动测速"做过精简)
+# 1) 策略层级由原模板的五层压缩为两层：业务组 → 核心出站组 → 具体节点；
+# 2) 核心出站组只有 3 个：
+#      · 自动测速(url-test) —— 每 300 秒全量测速,自动切到延迟最低的节点,默认走它；
+#      · 故障转移(fallback) —— 不看延迟,按订阅顺序选第一个可用的,适合需要固定出口的场景；
+#      · 手动切换(select)   —— 自己在面板上挑节点；
+#    想换默认策略,改"1.5 策略组代理锚点"里 SelectPY 的 proxies 顺序即可；
+# 3) 已删除原模板的地区策略组(港/日/美/台/韩/欧/狮城/其他)与三层负载均衡组(轮询/散列/粘滞),节点不再按地区拆分,统一交给自动测速挑选；
+# 4) "漏网之鱼"、"网络测试"、"默认直连" 默认直连,需要全代理时把它们切到"自动测速"即可(实际意义并不大)；
+# 5) 关于"默认直连"策略组,主要挂载了 geolocation-!cn 非中国域名,它包含 gfw 被墙域名,以及其他几乎未被墙的境外域名(cloudflare、cloudfront、fastly 等 CDN),由于前面已滤掉 gfw 被墙域名,剩下的几乎未被墙,可根据使用情况切换代理。
+
+# 配置区
+# 1 锚点配置
+# 1.1 机场订阅锚点 - 订阅源基础配置 (根据自己机场特性,在filter参数中添加不需要的机场节点关键字,若需保留相关节点,删除该节点名称的关键字)
+BaseProvider: &BaseProvider {type: http, interval: 86400, proxy: DIRECT, health-check: {enable: true, url: 'https://www.google.com/generate_204', interval: 300}, filter: '^(?!.*(客户端|特殊|如果|导致|失效|重新|一下|测试|剩余|套餐|公告|排除|直接连接|群|邀请|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author|Traffic|GB))'}
+
+# 1.2 策略组类型锚点 - 精简版只保留 select / fallback / url-test 三种
+BaseHS: &BaseHS {type: select}                                                                                                                              # 手动选择：下拉指定某个节点/策略组
+BaseFB: &BaseFB {type: fallback, empty-fallback: REJECT, interval: 300, lazy: false, timeout: 3000, max-failed-times: 2, hidden: false, url: 'https://www.gstatic.com/generate_204'}  # 故障转移：按列表顺序选第一个可用节点，前面的挂了才往后切，不看延迟
+BaseUT: &BaseUT {type: url-test, empty-fallback: REJECT, interval: 300, lazy: false, timeout: 3000, max-failed-times: 2, hidden: false, url: 'https://www.gstatic.com/generate_204', tolerance: 50}  # 自动测速：每 300s 全量测一遍延迟，自动选当前最快的节点；tolerance=50 表示新节点延迟不比当前快 50ms 以上就不切换，避免频繁抖动
+
+# 1.3 规则集行为锚点
+BehaviorDN:   &BehaviorDN {type: http, behavior: domain,    format: mrs,  interval: 86400}
+BehaviorDY:   &BehaviorDY {type: http, behavior: domain,    format: yaml, interval: 86400}
+BehaviorIP:   &BehaviorIP {type: http, behavior: ipcidr,    format: mrs,  interval: 86400}
+BehaviorCY:   &BehaviorCY {type: http, behavior: classical, format: yaml, interval: 86400}
+BehaviorTT:   &BehaviorTT {type: http, behavior: domain,    format: text, interval: 86400}
+
+# 1.4 机场节点筛选正则表达式 - 精简版只保留"垃圾节点"过滤（地区分组已移除,如需按地区拆分策略组,可自行加回 FilterHK/FilterJP 之类的锚点）
+FilterAL:     &FilterAL '^(?!.*(DIRECT|直接连接|群|邀请|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author))'
+
+# 1.5 策略组代理锚点 - 精简后只有 4 个核心出站组,业务组只需从这 4 个里挑选
+SelectPY:     &SelectPY {type: select, proxies: [自动测速, 故障转移, 手动切换, 直接连接]}                    # 代理类默认模板：首选自动测速
+SelectDD:     &SelectDD {type: select, proxies: [直接连接, 默认代理, 自动测速, 故障转移, 手动切换]}          # 直连优先模板
+SelectDC:     &SelectDC {type: select, proxies: [直接连接, 默认代理, 自动测速, 故障转移, 手动切换]}          # 兜底模板
+SelectFB:     &SelectFB {type: select, proxies: [默认代理, 自动测速, 故障转移, 手动切换, 直接连接]}          # 业务分流模板
+
+# 1.6 机场订阅
+# 单机场,已填入订阅链接。若以后加第二个机场,取消下面 Airport2 的注释即可(节点名会自动加[主]/[备]前缀避免重名)。
+# 若订阅域名被墙导致更新失败,把 BaseProvider 里的 proxy 改成 '默认代理' 即可走代理更新订阅。
+proxy-providers:
+  # Airport1订阅源 - 主机场节点集合
+  Airport1: {<<: *BaseProvider, url: '<mihomo机场订阅>'}
+  # Airport2订阅源 - 备用机场节点集合
+#  Airport2: {<<: *BaseProvider, url: 'Airport2订阅源地址', override: {additional-prefix: '[备] '}}
+
+# 2 核心配置
+# 2.1 基础配置
+mode: rule                                                              # 工作模式  rule(规则模式)/ global(全局模式)/ direct(直连模式)
+ipv6: false                                                              # 网络协议  是否启用 IPv6 支持
+mixed-port: 7893                                                        # 监听端口  HTTP + SOCKS5 混合代理端口
+allow-lan: true                                                         # 局域连接  是否允许局域网设备连接
+bind-address: "*"                                                       # 监听接口  监听的网络接口(* 表示所有接口)
+log-level: warning                                                      # 日志级别  silent(静默)/ error(错误)/ warning(警告)/ info(信息)/ debug(调试)
+unified-delay: true                                                     # 统一延迟  减少节点延迟抖动
+tcp-concurrent: true                                                    # 并发连接  提升多任务性能
+profile: { store-selected: true, store-fake-ip: true }                  # 保存选择  记住选择的节点和策略组、Fake-IP 映射
+
+# 2.2 地理数据
+geo-auto-update: true                                                   # 自动更新  geodata
+geo-update-interval: 24                                                 # 更新间隔  单位:小时
+geodata-mode: true                                                      # 数据分流  使用数据集进行规则与分流匹配
+geox-url:
+  geosite: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat
+  geoip:   https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat
+  mmdb:    https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.metadb
+  asn:     https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/GeoLite2-ASN.mmdb
+
+# 2.3 认证配置
+# authentication:
+#   - mihomo:mihomo
+
+# 2.4管理面板配置
+external-ui-url: https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip
+external-controller: 0.0.0.0:9090                                       # 面板地址
+external-ui-name: zashboard                                             # 面板名称
+external-ui: ui                                                         # 面板目录
+secret: 830128suyang                                                        # 面板密码  ⚠ 务必改成自己的；external-controller 是 0.0.0.0,局域网内任何人都能访问控制面板
+
+# 2.5 TUN模式配置
+tun:
+  enable: true                                                          # 网卡模式  是否启用 TUN 虚拟网卡模式
+  stack: mixed                                                          # 协议类型  网络栈:system(系统栈)/ gvisor(内置用户态栈)/ mixed(混合)
+  dns-hijack: [udp://any:53, tcp://any:53]                              # 劫持请求  劫持所有 UDP/TCP 53 端口的 DNS 请求
+  auto-detect-interface: true                                           # 自动出口  自动识别默认出口网络接口 (仅内核模式有效)
+  auto-route: true                                                      # 自动路由  自动添加系统路由表      (仅内核模式有效)
+  auto-redirect: true                                                   # 自动定向  自动将流量重定向至 TUN  (仅内核模式有效)
+  strict-route: false                                                   # 路由模式  严格路由模式
+  endpoint-independent-nat: true                                        # 端点无关  NAT(提高 NAT 类型兼容性,适用于 P2P 和游戏)
+  route-exclude-address-set: [cn_IP]                                    # 绕过大陆  匹配大陆IP-CIDR(流量不进入代理)
+
+# 2.6 嗅探功能
+sniffer:
+  enable: true                                                          # 启用嗅探  提升分流准确性
+  override-destination: true                                            # 成功解析  使用嗅探到的域名覆盖原始目标地址
+  parse-pure-ip: true                                                   # 反向解析  解析纯 IP 连接(尝试反向解析获得域名)
+  force-dns-mapping: true                                               # 强制映射  DNS 映射(对纯 IP 连接尝试 DNS 映射)
+  sniff:
+    QUIC: { ports: [443] }                                              # 嗅探参数  QUIC 协议流量(HTTP/3 常用端口)
+    TLS:  { ports: [443, 8443] }                                        # 嗅探参数  HTTPS(TLS)常用及备用端口
+    HTTP: { ports: [80, 8080-8880] }                                    # 嗅探参数  HTTP 及常见 Web / 代理端口段
+  force-domain:
+    - "+.netflix.com"                                                   # 强制嗅探  Netflix 主域名
+    - "+.nflxvideo.net"                                                 # 强制嗅探  Netflix CDN
+    - "+.amazonaws.com"                                                 # 强制嗅探  AWS 云服务
+    - "+.media.dssott.com"                                              # 强制嗅探  Disney+ 流媒体
+    - "+.tiktok.com"                                                    # 强制嗅探  TikTok 流媒体
+  skip-domain:
+    - Mijia Cloud                                                       # 跳过嗅探  米家云服务
+    - dlg.io.mi.com                                                     # 跳过嗅探  小米设备通信
+    - "+.oray.com"                                                      # 跳过嗅探  花生壳服务
+    - "+.sunlogin.net"                                                  # 跳过嗅探  向日葵远程控制
+    - "+.push.apple.com"                                                # 跳过嗅探  苹果推送服务
+
+# 2.7 本地静态域名映射表(优先级最高,用来强制把某个域名解析到指定 IP,不走 DNS、不经过规则判断)
+hosts:
+  "epdg.epc.mnc010.mcc234.pub.3gppnetwork.org": [87.194.8.8, 87.194.88.8, 87.194.89.8, 87.194.9.8]
+  services.googleapis.cn: services.googleapis.com
+  dns.alidns.com: [223.5.5.5, 223.6.6.6, 2400:3200::1, 2400:3200:baba::1]
+  doh.pub: [1.12.12.12, 1.12.12.21, 120.53.53.53]
+  dns.google: [8.8.8.8, 8.8.4.4, 2001:4860:4860::8888, 2001:4860:4860::8844]
+  cloudflare-dns.com: [1.1.1.1, 1.0.0.1, 2606:4700:4700::1111, 2606:4700:4700::1001]
+
+# 2.8 DNS配置
+dns:
+  enable: true                                                          # 解析服务  启用 Clash 内置 DNS 服务
+  ipv6: true                                                            # 网络协议  启用 IPv6 DNS 解析支持
+  listen: 0.0.0.0:7874                                                  # 监听服务  DNS 服务监听地址与端口
+  enhanced-mode: fake-ip                                                # 增强模式  FDNS 增强模式(Fake-IP,用于防止 DNS 泄露)
+  fake-ip-range: 198.18.0.1/16                                          # 虚拟地址  Fake-IP 虚拟地址池范围
+  fake-ip-filter-mode: blacklist                                        # 过滤模式  Fake-IP 过滤模式(命中规则则返回真实 IP)
+  respect-rules: false                                                  # 遵循规则  不强制遵循规则顺序
+  nameserver:                                                           # 解析服务  可改为运营商提供的 DNS
+    - 119.29.29.29
+    - 223.5.5.5
+    - 180.76.76.76
+    - 114.114.114.114
+  fake-ip-filter:
+    - +.lan                                                             # 真实解析  常见局域网域名后缀
+    - +.local                                                           # 真实解析  常见局域网域名后缀
+    - +.home                                                            # 真实解析  常见局域网域名后缀
+    - +.internal                                                        # 真实解析  常见局域网域名后缀
+    - GEOSITE:cn                                                        # 真实解析  中国域名
+    - GEOSITE:geolocation-cn                                            # 真实解析  补充中国域名
+    - rule-set:fakeip-filter                                            # 真实解析  DustinWin收录的fake-ip-filter，主要包含授时服务器、广告拦截服务器、标准公网STUN/TURN中继服务器等域名
+    - +.jsdelivr.net
+
+# 3 代理策略组
+proxy-groups:
+  # 3.1 业务策略组(根据需求按“1.5 策略组代理列表”模板自行选择默认类型)
+  - {name: 默认代理,       <<: *SelectPY, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Proxy.png}
+  - {name: 默认直连,       <<: *SelectDD, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Static.png}
+  - {name: Github,        <<: *SelectFB, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/GitHub.png}
+  - {name: 油管视频,       <<: *SelectFB, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/YouTube.png}
+  - {name: 谷歌服务,       <<: *SelectFB, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Google_Search.png}
+  - {name: AI服务,        <<: *SelectFB, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/AI.png}
+  - {name: 国外电商,       <<: *SelectFB, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Ecommerce_1.png}
+  - {name: 加密货币,       <<: *SelectFB, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Cryptocurrency.png}
+  - {name: 即时通讯,       <<: *SelectFB, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Communication.png}
+  - {name: 社交媒体,       <<: *SelectFB, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Media_1.png}
+  - {name: TikTok,        <<: *SelectFB, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/TikTok.png}
+  - {name: 奈飞视频,       <<: *SelectFB, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Netflix.png}
+  - {name: 迪士尼+,        <<: *SelectFB, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Disney%2B.png}
+  - {name: HBO,           <<: *SelectFB, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/HBO_Max.png}
+  - {name: Prime Video,   <<: *SelectFB, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Prime_Video.png}
+  - {name: Spotify,       <<: *SelectFB, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Spotify.png}
+  - {name: 国外娱乐,       <<: *SelectFB, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/ForeignMedia.png}
+  - {name: Bing(Copilot), <<: *SelectDC, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Bing.png}
+  - {name: 微软服务,       <<: *SelectDC, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Microsoft.png}
+  - {name: 苹果服务,       <<: *SelectDC, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Apple.png}
+  - {name: Emby,          <<: *SelectDC, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Emby.png}
+  - {name: 游戏平台,       <<: *SelectDC, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Game.png}
+
+  # 3.2 兜底与直连组
+  - {name: 漏网之鱼,       <<: *SelectDC, default-selected: '默认代理', icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Final.png}
+  - {name: 网络测试,       <<: *SelectDC, default-selected: '直接连接', icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Speedtest.png}
+  - {name: 直接连接,       <<: *BaseHS, proxies: [DIRECT], hidden: true, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Direct.png}
+
+  # 3.3 核心出站组(真正的节点容器,自动拉取订阅里的全部节点,精简后只保留 3 个)
+  - {name: 自动测速,       <<: *BaseUT, include-all: true, filter: *FilterAL, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Auto.png}        # 默认用它:每 300s 全量测速,自动切到延迟最低的节点
+  - {name: 故障转移,       <<: *BaseFB, include-all: true, filter: *FilterAL, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/Back.png}        # 不看延迟,按订阅顺序选第一个可用的,适合需要固定出口
+  - {name: 手动切换,       <<: *BaseHS, include-all: true, filter: *FilterAL, icon: https://testingcf.jsdelivr.net/gh/gogyt/Qure@master/IconSet/Color/World_Map.png}   # 自己在面板上挑节点
+
+# 4 规则路由 (按照从上往下的顺序遍历,相互隶属的规则按"金字塔"模式排序实现分流,优先命中上位规则,规则重复无影响,修改顺序会影响分流效果,如geolocation-!cn为境外域名,包含了前置gfw被墙域名,先滤掉gfw被墙域名后，剩下的就是未被墙的境外域名)
+rules:
+  # 4.1 拦截规则(按需启用,可禁用拦截,不影响使用效果)
+  - GEOSITE,category-ads-all,REJECT                          # 轻量化广告拦截列表,搭配AWAvenueAds秋风广告列表使用,同时禁用adblock广告过滤列表
+  - RULE-SET,AWAvenueAds,REJECT                              # 秋风广告过滤列表,搭配category-ads-all广告列表使用,同时禁用adblock广告过滤列表
+  - RULE-SET,adblock,REJECT                                  # adblock广告过滤列表,与秋风、category-ads-all广告列表单独使用
+
+  # 4.2 域名规则
+  - GEOSITE,private,直接连接                                  # 私有域名
+  - GEOIP,private,直接连接,no-resolve                         # 内网 / 保留 IP(127/8、192.168/16…)
+  - RULE-SET,My_Direct,直接连接                               # 自定义直连域名
+  - RULE-SET,Direct_0,直接连接                                # 漏网之鱼Direct列表
+  - RULE-SET,Custom_Direct_Domain,直接连接                    # 自定义直连域名
+  - GEOSITE,category-game-platforms-download,直接连接         # 游戏平台下载
+  - GEOSITE,category-public-tracker,直接连接                  # BT Tracker
+  - GEOSITE,category-pt,直接连接                              # PT站
+  - GEOSITE,category-games@cn,直接连接                        # 国内游戏
+  - GEOSITE,category-games-cn,直接连接                        # 国区游戏平台
+  - GEOSITE,google-cn,直接连接                                # Google中国服务
+  - GEOSITE,apple@cn,直接连接                                 # 苹果中国
+  - GEOSITE,bing@cn,直接连接                                  # bing中国
+  - GEOSITE,microsoft@cn,直接连接                             # 微软中国
+  - GEOSITE,bing,Bing(Copilot)                               # bing (含copilot,category-ai-!cn中也含了copilot,在使用edge浏览器时,后台会启用copilot产生流量,需要时开启代理)
+  - GEOSITE,github,Github                                    # GitHub(属Microsoft的子集,置其前才能分流)
+  - GEOSITE,apple,苹果服务                                    # 苹果服务
+  - RULE-SET,Speedtest,网络测试                               # 测速工具
+  - GEOSITE,category-speedtest,网络测试                       # 测速工具
+  - GEOSITE,test-ipv6,网络测试                                # 测速工具
+  - GEOSITE,category-ai-!cn,AI服务                           # AI服务(国外AI兜底,含openai、gemini、copilot、claude、grok等)
+  - GEOSITE,youtube,油管视频                                  # YouTube
+  - GEOSITE,tiktok,TikTok                                    # TikTok
+  - GEOSITE,netflix,奈飞视频                                  # Netflix
+  - GEOSITE,disney,迪士尼+                                    # Disney+
+  - GEOSITE,hbo,HBO                                          # HBO
+  - GEOSITE,primevideo,Prime Video                           # Prime Video
+  - GEOSITE,category-emby,Emby                               # Emby
+  - GEOSITE,spotify,Spotify                                  # Spotify
+  - GEOSITE,google,谷歌服务                                   # Google服务
+  - GEOSITE,category-games,游戏平台                           # 游戏平台(含category-games-cn、Steam)
+  - GEOSITE,category-communication,即时通讯                   # 即时通讯(含telegram、WhatsApp、clubhouse等,若需精简,可以将注释掉"3.1 业务策略组"中相应的分组)
+  - GEOSITE,category-social-media-!cn,社交媒体                # 国外社交媒体(含instagram、facebook、twitter、mixi等,若需精简,可以将注释掉"3.1 业务策略组"中相应的分组)
+  - GEOSITE,category-entertainment,国外娱乐                   # 国外娱乐(含youtube、tiktok、bahamut、primevideo、netflix、disney、apple-tvplus、hbo、category-games-!cn、tmdb、imdb等,若需精简,可以注释掉5.3相应的规则及"3.1 业务策略组"中对应的分组,最终到此规则兜底)
+  - GEOSITE,category-ecommerce,国外电商                       # 国外电商
+  - GEOSITE,category-cryptocurrency,加密货币                  # 加密货币(大部分在gfw中)
+  - GEOSITE,gfw,默认代理                                      # GFW列表(主要规则,被墙列表)
+  - GEOSITE,microsoft,微软服务                                # 微软服务
+  - GEOIP,telegram,即时通讯,no-resolve                        # Telegram IP
+  - GEOIP,twitter,社交媒体,no-resolve                         # Twitter IP
+  - GEOIP,facebook,社交媒体,no-resolve                        # Facebook IP
+  - GEOIP,google,谷歌服务,no-resolve                          # Google IP
+  - GEOIP,netflix,奈飞视频,no-resolve                         # Netflix IP
+  - GEOSITE,geolocation-!cn,默认直连                          # 非中国域名(本条主要是境外域名,涵盖gfw被墙域名,其余几乎未被墙,前面gfw滤掉了被墙域名,这里默认直连,视连接情况切换代理)
+  - GEOIP,cloudflare,默认直连,no-resolve                      # cloudflare(geolocation-!cn已包含cloudflare,这里IP补充)
+  - GEOIP,cloudfront,默认直连,no-resolve                      # 亚马逊旗下CDN(同上IP补充)
+ # - GEOIP,fastly,默认直连,no-resolve                          # FSLY CDN(同上IP补充，注：有的代理软件默认GEO数据中缺少GEOIP,fastly数据，可尝试启用)
+  - GEOSITE,cn,直接连接                                       # 中国域名
+  - GEOIP,cn,直接连接,no-resolve                              # 中国IP
+  - RULE-SET,non_standard_port,直接连接                       # 非标端口
+  - MATCH,漏网之鱼                                            # 漏网之鱼
+
+# 5 补充规则
+rule-providers:
+  # 5.1 拦截规则
+  AWAvenueAds:           {<<: *BehaviorDN, url: https://gcore.jsdelivr.net/gh/TG-Twilight/AWAvenue-Ads-Rule@main/Filters/AWAvenue-Ads-Rule-Clash.mrs}
+  adblock:               {<<: *BehaviorDN, url: https://testingcf.jsdelivr.net/gh/gogyt/Mihomo@main/geo/geosite/adblock.mrs}
+
+  # 5.2 fakeip-filter规则
+  fakeip-filter:         {<<: *BehaviorDN, url: https://testingcf.jsdelivr.net/gh/DustinWin/ruleset_geodata@mihomo-ruleset/fakeip-filter.mrs}
+
+  # 5.3 其他规则
+  Direct_0:              {<<: *BehaviorCY, url: https://testingcf.jsdelivr.net/gh/xsi640/mihomo@main/rule/Direct.yaml}
+  My_Direct:             {<<: *BehaviorCY, url: https://testingcf.jsdelivr.net/gh/gogyt/Mihomo@main/rule/Direct.yaml}
+  Custom_Direct_Domain:  {<<: *BehaviorDN, url: https://testingcf.jsdelivr.net/gh/gogyt/Mihomo@main/rule/Custom_Direct_Domain.mrs}
+  Speedtest:             {<<: *BehaviorDN, url: https://testingcf.jsdelivr.net/gh/gogyt/Mihomo@main/geo/geosite/speedtest.mrs}
+  cn_IP:                 {<<: *BehaviorIP, url: https://testingcf.jsdelivr.net/gh/gogyt/Mihomo@main/geo/geoip/cn.mrs}
+  non_standard_port:     {<<: *BehaviorCY, url: https://testingcf.jsdelivr.net/gh/gogyt/Mihomo@main/rule/Custom_Port_Direct.yaml}
+# ==================== EOF ====================
