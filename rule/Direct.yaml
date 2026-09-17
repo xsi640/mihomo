@@ -8,3 +8,39 @@ payload:
   - IP-CIDR,103.10.124.0/23,no-resolve
   - DST-PORT,7844
   - SRC-PORT,41641
+
+  # 同花顺
+  - IP-CIDR,58.220.49.0/24,no-resolve
+  - IP-CIDR,58.63.236.0/24,no-resolve
+  - IP-CIDR,61.136.165.0/24,no-resolve
+  - IP-CIDR,119.97.139.0/24,no-resolve
+  - IP-CIDR,122.224.214.0/24,no-resolve
+  - IP-CIDR,183.131.184.0/24,no-resolve
+  - IP-CIDR,8.134.98.163/32,no-resolve
+  - IP-CIDR,8.138.46.177/32,no-resolve
+  - IP-CIDR,8.145.212.55/32,no-resolve
+  - IP-CIDR,27.128.218.162/32,no-resolve
+  - IP-CIDR,116.63.108.136/32,no-resolve
+  - IP-CIDR,116.63.233.254/32,no-resolve
+  - IP-CIDR,118.123.244.150/32,no-resolve
+  - IP-CIDR,121.37.31.87/32,no-resolve
+  - IP-CIDR,122.9.46.212/32,no-resolve
+  - IP-CIDR,122.9.125.190/32,no-resolve
+  - IP-CIDR,122.9.202.190/32,no-resolve
+  - IP-CIDR,122.224.106.17/32,no-resolve
+  - IP-CIDR,183.131.2.244/32,no-resolve
+  - IP-CIDR,210.51.52.107/32,no-resolve
+  - IP-CIDR,210.51.244.173/32,no-resolve
+  - IP-CIDR,218.71.143.175/32,no-resolve
+  - IP-CIDR,218.71.143.176/32,no-resolve
+  - IP-CIDR,218.75.76.203/32,no-resolve
+  - IP-CIDR,218.75.76.204/32,no-resolve
+  - IP-CIDR,218.78.212.157/32,no-resolve
+  - IP-CIDR,218.78.212.158/32,no-resolve
+  - IP-CIDR,218.78.212.159/32,no-resolve
+  - IP-CIDR,218.78.212.160/32,no-resolve
+  - IP-CIDR,218.78.212.161/32,no-resolve
+  - IP-CIDR,218.78.212.162/32,no-resolve
+  - IP-CIDR,218.78.212.185/32,no-resolve
+  - IP-CIDR,221.12.2.50/32,no-resolve
+
