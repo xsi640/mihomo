@@ -10,6 +10,7 @@ payload:
   - SRC-PORT,41641
 
   # 同花顺
+  - DOMAIN-SUFFIX,10jqka.com.cn
   - IP-CIDR,58.220.49.0/24,no-resolve
   - IP-CIDR,58.63.236.0/24,no-resolve
   - IP-CIDR,61.136.165.0/24,no-resolve
