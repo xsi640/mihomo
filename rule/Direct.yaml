@@ -9,8 +9,128 @@ payload:
   - DST-PORT,7844
   - SRC-PORT,41641
 
-  #cdn
-  -DOMAIN-SUFFIX,alicdn.com,DIRECT
+  # 阿里云 CDN
+  - DOMAIN-SUFFIX,alicdn.com,DIRECT
+  - DOMAIN-SUFFIX,aliyun-inc.com,DIRECT
+  - DOMAIN-SUFFIX,aliyuncs.com,DIRECT
+  - DOMAIN-SUFFIX,alikunlun.com,DIRECT
+  - DOMAIN-SUFFIX,alikunlun.net,DIRECT
+  - DOMAIN-SUFFIX,cdngslb.com,DIRECT
+  - DOMAIN-SUFFIX,tbcache.com,DIRECT
+  
+  # 腾讯云 CDN
+  - DOMAIN-SUFFIX,dnsv1.com,DIRECT
+  - DOMAIN-SUFFIX,cdntip.com,DIRECT
+  - DOMAIN-SUFFIX,spcdntip.com,DIRECT
+  
+  # 百度云 CDN
+  - DOMAIN-SUFFIX,jomodns.com,DIRECT
+  - DOMAIN-SUFFIX,bdydns.com,DIRECT
+  - DOMAIN-SUFFIX,yunjiasu-cdn.net,DIRECT
+  - DOMAIN-SUFFIX,bce-cdn.net,DIRECT
+  
+  # 金山云 CDN
+  - DOMAIN-SUFFIX,ksyuncdn.com,DIRECT
+  - DOMAIN-SUFFIX,ks-cdn1.com,DIRECT
+  - DOMAIN-SUFFIX,ks-cdn.com,DIRECT
+  - DOMAIN-SUFFIX,ksycdn.cn,DIRECT
+  
+  # 京东云 CDN
+  - DOMAIN-SUFFIX,jdcdn.com,DIRECT
+  - DOMAIN-SUFFIX,jcloudcs.com,DIRECT
+  - DOMAIN-SUFFIX,qianxun.com,DIRECT
+  - DOMAIN-SUFFIX,jcloudlb.com,DIRECT
+  - DOMAIN-SUFFIX,jcloud-cdn.com,DIRECT
+  
+  # UCloud CDN
+  - DOMAIN-SUFFIX,ucloud.cn,DIRECT
+  - DOMAIN-SUFFIX,ucloud.com.cn,DIRECT
+  - DOMAIN-SUFFIX,cdndo.com,DIRECT
+  
+  # 网宿科技
+  - DOMAIN-SUFFIX,wsdvs.com,DIRECT
+  - DOMAIN-SUFFIX,wsglb0.com,DIRECT
+  - DOMAIN-SUFFIX,wscdns.com,DIRECT
+  - DOMAIN-SUFFIX,wangsu.com,DIRECT
+  - DOMAIN-SUFFIX,chinanetcenter.com,DIRECT
+  
+  # 白山云
+  - DOMAIN-SUFFIX,bsgslb.cn,DIRECT
+  - DOMAIN-SUFFIX,qingcdn.com,DIRECT
+  - DOMAIN-SUFFIX,bsclink.cn,DIRECT
+  - DOMAIN-SUFFIX,trpcdn.net,DIRECT
+  
+  # 帝联科技
+  - DOMAIN-SUFFIX,fastcdn.com,DIRECT
+  - DOMAIN-SUFFIX,tlgslb.com,DIRECT
+  - DOMAIN-SUFFIX,flxdns.com,DIRECT
+  - DOMAIN-SUFFIX,dlgslb.cn,DIRECT
+  
+  # 又拍云
+  - DOMAIN-SUFFIX,aicdn.com,DIRECT
+  - DOMAIN-SUFFIX,upcdn.net,DIRECT
+  - DOMAIN-SUFFIX,upaiyun.com,DIRECT
+  
+  # 七牛云
+  - DOMAIN-SUFFIX,qiniu.com,DIRECT
+  - DOMAIN-SUFFIX,qiniudns.com,DIRECT
+  - DOMAIN-SUFFIX,qbox.me,DIRECT
+  - DOMAIN-SUFFIX,clouddn.com,DIRECT
+  - DOMAIN-SUFFIX,qiniucdn.com,DIRECT
+  - DOMAIN-SUFFIX,qnssl.com,DIRECT
+  
+  # 青云
+  - DOMAIN-SUFFIX,qingcache.com,DIRECT
+  - DOMAIN-SUFFIX,qingcloud.com,DIRECT
+  - DOMAIN-SUFFIX,frontwize.com,DIRECT
+  
+  # 快网 CDN
+  - DOMAIN-SUFFIX,cloudglb.com,DIRECT
+  - DOMAIN-SUFFIX,fastweb.com,DIRECT
+  - DOMAIN-SUFFIX,fastwebcdn.com,DIRECT
+  - DOMAIN-SUFFIX,cloudcdn.net,DIRECT
+  - DOMAIN-SUFFIX,fwcdn.com,DIRECT
+  - DOMAIN-SUFFIX,fwdns.net,DIRECT
+  
+  # 360 云 CDN
+  - DOMAIN-SUFFIX,qhcdn.com,DIRECT
+  - DOMAIN-SUFFIX,qh-cdn.com,DIRECT
+  - DOMAIN-SUFFIX,qihucdn.com,DIRECT
+  - DOMAIN-SUFFIX,360cdn.com,DIRECT
+  
+  # 网易云 CDN
+  - DOMAIN-SUFFIX,126.net,DIRECT
+  - DOMAIN-SUFFIX,163jiasu.com,DIRECT
+  - DOMAIN-SUFFIX,sf.163.com,DIRECT
+  
+  # 其他 CDN
+  - DOMAIN-SUFFIX,15cdn.com,DIRECT
+  - DOMAIN-SUFFIX,tzcdn.cn,DIRECT
+  - DOMAIN-SUFFIX,aocdn.com,DIRECT
+  - DOMAIN-SUFFIX,maoyun.tv,DIRECT
+  - DOMAIN-SUFFIX,maoyundns.com,DIRECT
+  - DOMAIN-SUFFIX,momentcdn.com,DIRECT
+  - DOMAIN-SUFFIX,800cdn.com,DIRECT
+  - DOMAIN-SUFFIX,msscdn.com,DIRECT
+  - DOMAIN-SUFFIX,verycloud.cn,DIRECT
+  - DOMAIN-SUFFIX,verycdn.net,DIRECT
+  - DOMAIN-SUFFIX,verygslb.com,DIRECT
+  - DOMAIN-SUFFIX,speedycloud.cc,DIRECT
+  - DOMAIN-SUFFIX,xundayun.cn,DIRECT
+  - DOMAIN-SUFFIX,xundayun.com,DIRECT
+  
+  # 国际 CDN（在中国有业务）
+  - DOMAIN-SUFFIX,akamai.net,DIRECT
+  - DOMAIN-SUFFIX,akamaiedge.net,DIRECT
+  - DOMAIN-SUFFIX,edgesuite.net,DIRECT
+  - DOMAIN-SUFFIX,akamaitech.net,DIRECT
+  - DOMAIN-SUFFIX,cloudfront.net,DIRECT
+  - DOMAIN-SUFFIX,panthercdn.com,DIRECT
+  - DOMAIN-SUFFIX,cdnga.net,DIRECT
+  - DOMAIN-SUFFIX,cdngc.net,DIRECT
+  - DOMAIN-SUFFIX,mucdn.net,DIRECT
+  - DOMAIN-SUFFIX,nucdn.net,DIRECT
+  - DOMAIN-SUFFIX,edgecastcdn.net,DIRECT
 
   # 网易
   - DOMAIN-SUFFIX,127.net,DIRECT
