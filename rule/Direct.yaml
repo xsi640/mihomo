@@ -9,6 +9,11 @@ payload:
   - DST-PORT,7844
   - SRC-PORT,41641
 
+  # 网易
+  - DOMAIN-SUFFIX,127.net,DIRECT
+  - DOMAIN-SUFFIX,126.com,DIRECT
+  - DOMAIN-SUFFIX,netease.com,DIRECT
+  
   # 同花顺
   - DOMAIN-SUFFIX,10jqka.com.cn,DIRECT
   - DOMAIN-SUFFIX,hexin.cn,DIRECT
