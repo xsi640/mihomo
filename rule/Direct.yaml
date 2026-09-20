@@ -13,6 +13,9 @@ payload:
   - DOMAIN-SUFFIX,127.net,DIRECT
   - DOMAIN-SUFFIX,126.com,DIRECT
   - DOMAIN-SUFFIX,netease.com,DIRECT
+
+  # 智谱
+  - DOMAIN-SUFFIX,bigmodel.cn,DIRECT
   
   # 同花顺
   - DOMAIN-SUFFIX,10jqka.com.cn,DIRECT
