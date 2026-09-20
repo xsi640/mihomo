@@ -9,6 +9,9 @@ payload:
   - DST-PORT,7844
   - SRC-PORT,41641
 
+  #cdn
+  -DOMAIN-SUFFIX,alicdn.com,DIRECT
+
   # 网易
   - DOMAIN-SUFFIX,127.net,DIRECT
   - DOMAIN-SUFFIX,126.com,DIRECT
