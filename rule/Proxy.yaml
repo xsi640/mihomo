@@ -1,2 +1,4 @@
 payload:
   - DOMAIN-KEYWORD,google
+  - DOMAIN-KEYWORD,pages.dev
+  - DOMAIN-KEYWORD,cloudflare
